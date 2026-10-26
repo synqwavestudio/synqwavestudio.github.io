@@ -142,10 +142,8 @@ footer p{margin-top:22px;font-size:13px;color:var(--mute);font-weight:500;letter
 .drift{animation:drift 14s ease-in-out infinite alternate}
 @keyframes drift{from{transform:translateX(-3%)}to{transform:translateX(3%)}}
 @media (prefers-reduced-motion:reduce){
- *,*::before,*::after{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}
- .js .rv{opacity:1;transform:none}
  html{scroll-behavior:auto}
- .pulse::after{display:none}
+}
 }
 
 /* tablet / desktop */
@@ -440,7 +438,7 @@ footer .copy{margin-top:14px}
  .card{padding:28px 22px 24px}
  .svc h3{font-size:22px}
 }
-@media (prefers-reduced-motion:reduce){.headline .ln{animation:none}}
+@media (prefers-reduced-motion:reduce){.headline .ln{animation-name:fadeIn}}
 
 /* legal pages */
 .legal{padding:120px 0 72px}
@@ -487,3 +485,18 @@ section.promo-sec{padding:28px 0 8px}
 .band-wrap+section~.band-wrap .drift{animation-delay:-12s,-6s}
 @keyframes wave-drift{from{transform:translateX(-6%)}to{transform:translateX(6%)}}
 @keyframes wave-swell{from{scale:1 .8}to{scale:1 1.15}}
+
+/* reduced motion (v4h): Android Battery Saver / "Remove animations" report reduced motion.
+   Keep the decorative background motion alive, just slower (~40% speed); drop movement-based entrances to fades. */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+ .drift{animation-duration:45s,27.5s}
+ .founder-frame .drift{animation-duration:55s,32.5s}
+ .hero-glow{animation-duration:17.5s}
+ .grad-anim{animation-duration:17.5s}
+ .pkg.feat .ring,.pkg.feat::after{animation-duration:12.5s}
+ .pulse::after{animation-duration:7s}
+ .scroll::after{animation-duration:4.5s}
+ .hero .lead,.hero-cta{animation-name:fadeIn}
+ .js .rv{transform:none;transition:opacity .8s ease}
+}

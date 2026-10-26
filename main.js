@@ -116,7 +116,7 @@ if(IO){
 function fmt(n){var s=String(n),o="";while(s.length>3){o=","+s.slice(-3)+o;s=s.slice(0,-3);}return s+o;}
 function countUp(e){
   var txt=e.textContent,target=parseInt(txt.replace(/[^\d]/g,""),10);
-  if(!target||RM)return;
+  if(!target)return;
   var t0=null,dur=1100;
   e.style.minWidth=e.offsetWidth+"px";e.style.display="inline-block";e.style.textAlign="right";
   function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur),k=1-Math.pow(1-p,3);
@@ -128,7 +128,7 @@ function countUp(e){
 /* scroll reveal */
 var rvs=[].slice.call(d.querySelectorAll(".rv"));
 function reveal(x){x.classList.add("in");if(x.classList.contains("pkg")){var c=x.querySelector(".cnt");if(c)setTimeout(function(){countUp(c);},350);}}
-if(IO&&!RM){
+if(IO){
   var rIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){reveal(e.target);rIO.unobserve(e.target);}});},{rootMargin:"0px 0px -8% 0px",threshold:.12});
   rvs.forEach(function(x){rIO.observe(x);});
 }else{rvs.forEach(function(x){x.classList.add("in");});}
@@ -138,8 +138,8 @@ d.addEventListener("touchstart",function(e){var t=e.target.closest&&e.target.clo
 
 /* promo video: play only when on screen */
 var vids=[].slice.call(d.querySelectorAll(".promo:not([hidden]) video"));
-vids.forEach(function(v){v.muted=true;if(RM){v.removeAttribute("autoplay");v.pause();v.controls=true;}});
-if(IO&&!RM){
+vids.forEach(function(v){v.muted=true;v.defaultMuted=true;v.playsInline=true;v.setAttribute("playsinline","");v.setAttribute("muted","");});
+if(IO){
   var vIO=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){v.controls=true;});}else{v.pause();}});},{threshold:.25});
   vids.forEach(function(v){vIO.observe(v);});
 }
@@ -197,11 +197,25 @@ if(form){
   });
 });
 
-/* hero waves canvas */
+/* hero waves canvas
+   Always alive: under reduced motion it keeps drifting, just slower (decorative, no layout movement).
+   Time-based motion (t from real elapsed time), drawn on every display frame (60 fps on phones too),
+   paused when off-screen or the tab is hidden, DPR capped for phones. */
 var cv=d.getElementById("waves");
 if(cv&&cv.getContext){
-  var ctx=cv.getContext("2d"),W=0,H=0,DPR=1,run=true,vis=true,last=0,t=0;
-  function size(){var r=cv.getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,innerWidth<700?1.5:1.25);W=r.width;H=r.height;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);if(!run||RM)draw();}
+  var ctx=cv.getContext("2d"),W=0,H=0,BW=0,BH=0,DPR=1,onScreen=true,raf=0,last=0,t=0,SPEED=RM?.4:1;
+  function size(){
+    var r=cv.getBoundingClientRect(),w=r.width,h=r.height;
+    if(!w||!h)return false;
+    DPR=Math.min(window.devicePixelRatio||1,w<700?1.5:1.25);
+    var bw=Math.round(w*DPR),bh=Math.round(h*DPR);
+    W=w;H=h;
+    /* only touch the backing store when its size really changes (mobile URL-bar resizes would otherwise blank it) */
+    if(bw!==BW||bh!==BH){BW=bw;BH=bh;cv.width=bw;cv.height=bh;}
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    draw();
+    return true;
+  }
   function ribbon(cy,amp,n,spread,speed,alpha,flip){
     var g=ctx.createLinearGradient(0,0,W,0);
     g.addColorStop(0,"rgba(30,212,255,"+alpha+")");g.addColorStop(.38,"rgba(24,110,255,"+alpha+")");g.addColorStop(.72,"rgba(138,61,255,"+alpha+")");g.addColorStop(1,"rgba(196,60,255,"+alpha+")");
@@ -220,6 +234,7 @@ if(cv&&cv.getContext){
     ctx.globalAlpha=1;
   }
   function draw(){
+    if(!W||!H)return;
     ctx.clearRect(0,0,W,H);
     ctx.lineWidth=1;ctx.globalCompositeOperation="lighter";
     var m=W<700,amp=Math.min(H*.09,m?44:80);
@@ -227,13 +242,25 @@ if(cv&&cv.getContext){
     ribbon(H*.12,amp*.7,m?14:22,m?44:70,.4,.32,-1);
     ctx.globalCompositeOperation="source-over";
   }
-  function frame(ts){if(!run)return;requestAnimationFrame(frame);if(!vis)return;if(ts-last<(W<700?33:16))return;var dt=last?Math.min(ts-last,50):16;last=ts;t+=dt/1000;draw();}
-  addEventListener("resize",size);size();
-  if(RM){run=false;draw();}
-  else{
-    requestAnimationFrame(frame);
-    if(IO){new IntersectionObserver(function(es){vis=es[0].isIntersecting;},{threshold:0}).observe(cv);}
-    d.addEventListener("visibilitychange",function(){vis=!d.hidden;});
+  function frame(ts){
+    raf=requestAnimationFrame(frame);
+    if(!W&&!size())return;
+    var dt=last?ts-last:0;last=ts;
+    if(dt>100)dt=100; /* after a hitch, resume smoothly instead of jumping */
+    t+=dt/1000*SPEED;
+    draw();
   }
+  function start(){if(!raf&&onScreen&&!d.hidden){last=0;raf=requestAnimationFrame(frame);}}
+  function stop(){if(raf){cancelAnimationFrame(raf);raf=0;}}
+  function update(){if(onScreen&&!d.hidden)start();else stop();}
+  var rsT=0;function onResize(){clearTimeout(rsT);size();rsT=setTimeout(size,200);}
+  addEventListener("resize",onResize);
+  addEventListener("orientationchange",function(){setTimeout(size,250);});
+  if(window.ResizeObserver)new ResizeObserver(function(){size();}).observe(cv);
+  size();
+  if(IO)new IntersectionObserver(function(es){onScreen=es[es.length-1].isIntersecting;update();},{threshold:0}).observe(cv);
+  d.addEventListener("visibilitychange",update);
+  addEventListener("pageshow",update);
+  start();
 }
 })();
