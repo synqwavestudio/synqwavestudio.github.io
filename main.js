@@ -11,21 +11,25 @@ function waLink(t){return "https://wa.me/"+WA+"?text="+encodeURIComponent(t);}
 /* ---------- content drop-ins (content.js) ---------- */
 /* founder photo */
 if(C.founderPhoto){var ff=d.getElementById("founder-frame");if(ff){ff.innerHTML="";var fi=el("img","founder-photo");fi.src=C.founderPhoto;fi.alt="Talmeez Ahmad, founder of SYNQWAVE";fi.loading="lazy";fi.decoding="async";ff.appendChild(fi);ff.classList.add("has-photo");}}
-/* service videos: 4 tiles; pick the 4K file on wide/dense screens, else the 1440 web file */
+/* service videos: 4 tiles, lazy. Source by width: <900px light 1080 file (-m), 900-1199 the 1440 file, >=1200 (or dense wide tiles) the 4K file.
+   No src at page load (poster only, preload=none); src is set near the viewport after window load (see "service videos: lazy load" below). */
 var SV=(C.serviceVideos||[]).filter(function(v){return v&&v.src;});
 var svRow=d.getElementById("svc-row");
+var svVids=[];
 if(SV.length&&svRow){
   var vw=window.innerWidth||root.clientWidth,dpr=window.devicePixelRatio||1;
+  var svMob=vw<900;
   var tileW=vw>=900?Math.min(vw,1240)/4:vw*.78;
-  var use4k=vw>=1200||dpr*tileW>=1400;
+  var use4k=!svMob&&(vw>=1200||dpr*tileW>=1400);
   SV.forEach(function(s){
     var f=el("figure","svc rv"),fr=el("div","svc-frame"),v=d.createElement("video");
-    v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;v.autoplay=true;v.preload="metadata";
-    ["muted","loop","playsinline","autoplay"].forEach(function(a){v.setAttribute(a,"");});
-    v.setAttribute("preload","metadata");v.setAttribute("aria-hidden","true");v.width=1080;v.height=1080;
+    v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;v.preload="none";
+    ["muted","loop","playsinline"].forEach(function(a){v.setAttribute(a,"");});
+    v.setAttribute("preload","none");v.setAttribute("aria-hidden","true");v.width=1080;v.height=1080;
     if(s.poster)v.poster=s.poster;
-    v.src=(use4k&&s.src4k)?s.src4k:s.src;
+    v._src=svMob?(s.srcM||s.src):((use4k&&s.src4k)?s.src4k:s.src);
     fr.appendChild(v);f.appendChild(fr);f.appendChild(el("figcaption",null,s.label||""));svRow.appendChild(f);
+    svVids.push(v);
   });
   svRow.hidden=false;
 }
@@ -149,12 +153,34 @@ if(IO){
 /* tap glow for touch */
 d.addEventListener("touchstart",function(e){var t=e.target.closest&&e.target.closest(".card,.pkg,.step,.case");if(!t)return;t.classList.add("tap");setTimeout(function(){t.classList.remove("tap");},700);},{passive:true});
 
-/* service videos: play only while on screen (also under reduced motion / battery saver) */
-var vids=[].slice.call(d.querySelectorAll(".svc-row:not([hidden]) video"));
-vids.forEach(function(v){v.muted=true;v.defaultMuted=true;v.playsInline=true;v.setAttribute("playsinline","");v.setAttribute("muted","");});
-if(IO){
-  var vIO=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){v.controls=true;});}else{v.pause();}});},{threshold:.35});
-  vids.forEach(function(v){vIO.observe(v);});
+/* service videos: lazy load + play only while on screen (also under reduced motion / battery saver).
+   - nothing downloads before window "load"
+   - grid (>=900px): src is set when a tile comes within ~200px of the viewport
+   - phone swipe row (<900px): src is set only for the tile that is actually showing in the row (>=55% visible) once the row is near the viewport,
+     so scrolling to the section loads one file and each swipe loads the next; off-screen tiles pause and keep their src (no reload on swipe back) */
+function svPlay(v){if(!v._on||!v.getAttribute("src"))return;var p=v.play();if(p&&p.catch)p.catch(function(){if(v._on&&v.paused)v.controls=true;});}
+function svLoad(v){if(v.getAttribute("src")||!v._src)return;v.preload="auto";v.setAttribute("preload","auto");v.src=v._src;svPlay(v);}
+function svBusy(){for(var i=0;i<svVids.length;i++){if(!svVids[i].paused)return true;}return false;}
+if(svVids.length){
+  svVids.forEach(function(v){v.muted=true;v.defaultMuted=true;v.playsInline=true;});
+  var svReady=false,svRowNear=false;
+  function svStart(){
+    svReady=true;
+    if(!IO){svVids.forEach(function(v){v._on=true;svLoad(v);});return;}
+    /* play/pause by on-screen visibility (clipped by the swipe row, so hidden tiles read as off screen) */
+    var vIO=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;v._on=e.isIntersecting;if(v._on)svPlay(v);else if(!v.paused)v.pause();});},{threshold:.35});
+    svVids.forEach(function(v){vIO.observe(v);});
+    if(svMob){
+      var seen=[];
+      var hIO=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;seen[svVids.indexOf(v)]=e.isIntersecting;if(e.isIntersecting&&svRowNear)svLoad(v);});},{root:svRow,threshold:.55});
+      svVids.forEach(function(v){hIO.observe(v);});
+      new IntersectionObserver(function(es){svRowNear=es[es.length-1].isIntersecting;if(svRowNear)svVids.forEach(function(v,i){if(seen[i])svLoad(v);});},{rootMargin:"200px 0px"}).observe(svRow);
+    }else{
+      var lIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){svLoad(e.target);lIO.unobserve(e.target);}});},{rootMargin:"200px 0px"});
+      svVids.forEach(function(v){lIO.observe(v);});
+    }
+  }
+  if(d.readyState==="complete")setTimeout(svStart,0);else addEventListener("load",function(){setTimeout(svStart,0);});
 }
 
 /* ---------- contact form: compose WhatsApp / email ---------- */
@@ -216,7 +242,7 @@ if(form){
    paused when off-screen or the tab is hidden, DPR capped for phones. */
 var cv=d.getElementById("waves");
 if(cv&&cv.getContext){
-  var ctx=cv.getContext("2d"),W=0,H=0,BW=0,BH=0,DPR=1,onScreen=true,raf=0,last=0,t=0,SPEED=RM?.4:1;
+  var ctx=cv.getContext("2d"),W=0,H=0,BW=0,BH=0,DPR=1,onScreen=true,raf=0,last=0,t=0,fc=0,SPEED=RM?.4:1;
   function size(){
     var r=cv.getBoundingClientRect(),w=r.width,h=r.height;
     if(!w||!h)return false;
@@ -261,6 +287,7 @@ if(cv&&cv.getContext){
     var dt=last?ts-last:0;last=ts;
     if(dt>100)dt=100; /* after a hitch, resume smoothly instead of jumping */
     t+=dt/1000*SPEED;
+    if(W<900&&svBusy()&&(fc++&1))return; /* phones: 30 fps while a service video plays */
     draw();
   }
   function start(){if(!raf&&onScreen&&!d.hidden){last=0;raf=requestAnimationFrame(frame);}}

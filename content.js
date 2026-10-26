@@ -12,10 +12,10 @@ window.SYNQWAVE_CONTENT = {
   /* Service videos right after the hero, in order. Muted, looping, play while on screen.
      src = 1440px web file (phones/tablets), src4k = 2160px file (wide screens), poster = still. Empty list = hidden. */
   serviceVideos: [
-    { label: "Branding",     src: "assets/video/branding.mp4",  src4k: "assets/video/branding-4k.mp4",  poster: "assets/video/branding.webp" },
-    { label: "Packaging",    src: "assets/video/packaging.mp4", src4k: "assets/video/packaging-4k.mp4", poster: "assets/video/packaging.webp" },
-    { label: "Print",        src: "assets/video/print.mp4",     src4k: "assets/video/print-4k.mp4",     poster: "assets/video/print.webp" },
-    { label: "Social Media", src: "assets/video/social.mp4",    src4k: "assets/video/social-4k.mp4",    poster: "assets/video/social.webp" }
+    { label: "Branding",     src: "assets/video/branding.mp4",  src4k: "assets/video/branding-4k.mp4", srcM: "assets/video/branding-m.mp4",  poster: "assets/video/branding.webp" },
+    { label: "Packaging",    src: "assets/video/packaging.mp4", src4k: "assets/video/packaging-4k.mp4", srcM: "assets/video/packaging-m.mp4", poster: "assets/video/packaging.webp" },
+    { label: "Print",        src: "assets/video/print.mp4",     src4k: "assets/video/print-4k.mp4", srcM: "assets/video/print-m.mp4",     poster: "assets/video/print.webp" },
+    { label: "Social Media", src: "assets/video/social.mp4",    src4k: "assets/video/social-4k.mp4", srcM: "assets/video/social-m.mp4",    poster: "assets/video/social.webp" }
   ],
 
   /* Case studies (4 to 6 real projects). Empty = "Selected projects coming soon" shows.
