@@ -310,6 +310,7 @@ footer p{margin-top:22px;font-size:13px;color:var(--mute);font-weight:500;letter
 .cs h3{margin-top:8px;font-size:clamp(22px,6vw,30px);font-weight:800;line-height:1.15;letter-spacing:-.01em;text-wrap:balance}
 .cs-imgs{margin-top:22px;display:grid;gap:12px}
 .cs-imgs img{width:100%;height:auto;aspect-ratio:3 / 2;object-fit:cover;border-radius:14px;background:#0a0d30}
+.cs-imgs img.nat{aspect-ratio:auto;object-fit:contain}
 .cs-dl{margin-top:26px;display:grid;gap:20px}
 .cs dt{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;width:max-content}
 .cs dd{margin-top:6px;font-size:15px;color:#c9d0f0;font-weight:500;line-height:1.6}
@@ -319,6 +320,7 @@ footer p{margin-top:22px;font-size:13px;color:var(--mute);font-weight:500;letter
  .case{flex-basis:calc((100% - 22px) / 2)}
  .cs-imgs{grid-template-columns:1fr 1fr}
  .cs-imgs img:first-child{grid-column:1 / -1}
+ .cs-imgs img.nat:last-child:nth-child(even){grid-column:1 / -1}
 }
 @media (min-width:760px){
  .cs{inset:0;margin:auto;width:min(880px,calc(100% - 48px));height:auto;max-height:calc(100% - 48px);border-radius:22px;background:linear-gradient(160deg,#0c1450,#05061e) padding-box,linear-gradient(135deg,rgba(30,212,255,.7),rgba(24,110,255,.35) 40%,rgba(182,52,255,.7)) border-box;border:1px solid transparent;box-shadow:0 40px 120px -30px rgba(70,90,255,.7)}

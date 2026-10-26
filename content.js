@@ -13,7 +13,7 @@ window.SYNQWAVE_CONTENT = {
      Example: { src: "https://synqwave-media.sites.tab.bot/promo.mp4",
                 poster: "https://synqwave-media.sites.tab.bot/promo.webp",
                 caption: "SYNQWAVE promo", vertical: true } */
-  promoVideo: { src: "https://synqwave-media3.sites.tab.bot/v/promo.mp4", poster: "https://synqwave-media3.sites.tab.bot/poster.jpg", caption: "SYNQWAVE promo", vertical: true },
+  promoVideo: { src: "https://synqwave-media3.sites.tab.bot/v/promo.mp4", poster: "https://synqwave-media3.sites.tab.bot/poster.jpg", caption: "", vertical: true },
 
   /* Case studies (4 to 6 real projects). Empty = "Selected projects coming soon" shows.
      Each entry:
@@ -26,6 +26,20 @@ window.SYNQWAVE_CONTENT = {
      Images for these projects live on https://synqwave-media.sites.tab.bot/projects/
      and https://synqwave-media2.sites.tab.bot/projects/ (each media site holds about 1.3 MB). */
   caseStudies: [
+    { client: "Pretty Please", industry: "Logo system, stationery and merchandise", tag: "Brand identity",
+      images: [
+        { src: "assets/work/pretty-please-1.webp", w: 1400, h: 788, alt: "Pretty Please stationery and merchandise: tote bag, letterhead, business cards, tags, notebook and envelope" },
+        { src: "assets/work/pretty-please-2.webp", w: 1400, h: 788, alt: "Pretty Please brand identity presentation: trendy, expressive, youthful, for Gen-Z" },
+        { src: "assets/work/pretty-please-3.webp", w: 1400, h: 788, alt: "Pretty Please logo system: primary logo, secondary logo, logo mark and black and white version" },
+        { src: "assets/work/pretty-please-4.webp", w: 1400, h: 788, alt: "Pretty Please logo on pink t-shirts" }
+      ] },
+    { client: "Liberty Perfume", industry: "Bottle and box, stationery, carry bags and posters", tag: "Packaging & print",
+      images: [
+        { src: "assets/work/liberty-perfume-1.webp", w: 1052, h: 600, alt: "Liberty Perfumes bottle and coral box" },
+        { src: "assets/work/liberty-perfume-2.webp", w: 1052, h: 600, alt: "Liberty Perfumes stationery: business cards, letterheads and envelopes" },
+        { src: "assets/work/liberty-perfume-3.webp", w: 1050, h: 600, alt: "Liberty Perfumes white and navy carry bags" },
+        { src: "assets/work/liberty-perfume-4.webp", w: 1052, h: 600, alt: "Three Liberty Perfumes posters with dancers, framed on a wall" }
+      ] },
     { client: "Adrak Lane Chai Co.", industry: "Café / Chai bar", tag: "Concept project",
       logo: { src: "https://synqwave-media.sites.tab.bot/projects/adrak-lane-logo.webp", alt: "Adrak Lane Chai Co. logo" },
       images: [
