@@ -11,11 +11,24 @@ function waLink(t){return "https://wa.me/"+WA+"?text="+encodeURIComponent(t);}
 /* ---------- content drop-ins (content.js) ---------- */
 /* founder photo */
 if(C.founderPhoto){var ff=d.getElementById("founder-frame");if(ff){ff.innerHTML="";var fi=el("img","founder-photo");fi.src=C.founderPhoto;fi.alt="Talmeez Ahmad, founder of SYNQWAVE";fi.loading="lazy";fi.decoding="async";ff.appendChild(fi);ff.classList.add("has-photo");}}
-/* promo video */
-var PV=C.promoVideo||{};
-if(PV.src){var pf=d.getElementById("promo"),pv=d.getElementById("promo-video");
-  if(pf&&pv){pv.src=PV.src;if(PV.poster)pv.poster=PV.poster;pv.setAttribute("autoplay","");pf.hidden=false;pf.classList.toggle("wide",PV.vertical===false);
-    var pc=d.getElementById("promo-cap");if(PV.caption)pc.textContent=PV.caption;else pc.remove();}}
+/* service videos: 4 tiles; pick the 4K file on wide/dense screens, else the 1440 web file */
+var SV=(C.serviceVideos||[]).filter(function(v){return v&&v.src;});
+var svRow=d.getElementById("svc-row");
+if(SV.length&&svRow){
+  var vw=window.innerWidth||root.clientWidth,dpr=window.devicePixelRatio||1;
+  var tileW=vw>=900?Math.min(vw,1240)/4:vw*.78;
+  var use4k=vw>=1200||dpr*tileW>=1400;
+  SV.forEach(function(s){
+    var f=el("figure","svc rv"),fr=el("div","svc-frame"),v=d.createElement("video");
+    v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;v.autoplay=true;v.preload="metadata";
+    ["muted","loop","playsinline","autoplay"].forEach(function(a){v.setAttribute(a,"");});
+    v.setAttribute("preload","metadata");v.setAttribute("aria-hidden","true");v.width=1080;v.height=1080;
+    if(s.poster)v.poster=s.poster;
+    v.src=(use4k&&s.src4k)?s.src4k:s.src;
+    fr.appendChild(v);f.appendChild(fr);f.appendChild(el("figcaption",null,s.label||""));svRow.appendChild(f);
+  });
+  svRow.hidden=false;
+}
 /* case studies: card grid + case study dialog */
 var CS=(C.caseStudies||[]).filter(function(c){return c&&c.client;});
 var csOpen=null;
@@ -136,11 +149,11 @@ if(IO){
 /* tap glow for touch */
 d.addEventListener("touchstart",function(e){var t=e.target.closest&&e.target.closest(".card,.pkg,.step,.case");if(!t)return;t.classList.add("tap");setTimeout(function(){t.classList.remove("tap");},700);},{passive:true});
 
-/* promo video: play only when on screen */
-var vids=[].slice.call(d.querySelectorAll(".promo:not([hidden]) video"));
+/* service videos: play only while on screen (also under reduced motion / battery saver) */
+var vids=[].slice.call(d.querySelectorAll(".svc-row:not([hidden]) video"));
 vids.forEach(function(v){v.muted=true;v.defaultMuted=true;v.playsInline=true;v.setAttribute("playsinline","");v.setAttribute("muted","");});
 if(IO){
-  var vIO=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){v.controls=true;});}else{v.pause();}});},{threshold:.25});
+  var vIO=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){v.controls=true;});}else{v.pause();}});},{threshold:.35});
   vids.forEach(function(v){vIO.observe(v);});
 }
 

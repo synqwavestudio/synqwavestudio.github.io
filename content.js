@@ -9,11 +9,14 @@ window.SYNQWAVE_CONTENT = {
      Example: founderPhoto: "https://synqwave-media.sites.tab.bot/talmeez.webp" */
   founderPhoto: "assets/founder-talmeez-v3.webp",
 
-  /* Muted looping promo video, shown right after the hero. Empty src = hidden.
-     Example: { src: "https://synqwave-media.sites.tab.bot/promo.mp4",
-                poster: "https://synqwave-media.sites.tab.bot/promo.webp",
-                caption: "SYNQWAVE promo", vertical: true } */
-  promoVideo: { src: "https://synqwave-media3.sites.tab.bot/v/promo.mp4", poster: "https://synqwave-media3.sites.tab.bot/poster.jpg", caption: "", vertical: true },
+  /* Service videos right after the hero, in order. Muted, looping, play while on screen.
+     src = 1440px web file (phones/tablets), src4k = 2160px file (wide screens), poster = still. Empty list = hidden. */
+  serviceVideos: [
+    { label: "Branding",     src: "assets/video/branding.mp4",  src4k: "assets/video/branding-4k.mp4",  poster: "assets/video/branding.webp" },
+    { label: "Packaging",    src: "assets/video/packaging.mp4", src4k: "assets/video/packaging-4k.mp4", poster: "assets/video/packaging.webp" },
+    { label: "Print",        src: "assets/video/print.mp4",     src4k: "assets/video/print-4k.mp4",     poster: "assets/video/print.webp" },
+    { label: "Social Media", src: "assets/video/social.mp4",    src4k: "assets/video/social-4k.mp4",    poster: "assets/video/social.webp" }
+  ],
 
   /* Case studies (4 to 6 real projects). Empty = "Selected projects coming soon" shows.
      Each entry:
