@@ -31,8 +31,26 @@ addEventListener("online",function(){[].forEach.call(d.images,function(im){if(im
   svVids.forEach(function(v){if(v.error&&v._src){v.src=mBust(v._src,9);v.load();svPlay(v);}});});
 /* posters: if a poster failed, fetch it again */
 function posterCheck(v){var u=v.getAttribute("poster");if(!u)return;var k=0;
-  (function tryP(src){var p=new Image();p.onload=function(){if(src!==u)v.setAttribute("poster",src);};
-    p.onerror=function(){if(k<4){k++;setTimeout(function(){tryP(mBust(u,k));},[1500,4000,9000,20000][k-1]);}};p.src=src;})(u);}
+  (function tryP(src){var p=new Image(),done=false;
+    function again(){if(done)return;done=true;if(k<4){k++;setTimeout(function(){tryP(mBust(u,k));},[1500,4000,9000,20000][k-1]);}}
+    /* v4t: a poster request that hangs (no error, no data) counts as failed after 7 s and is asked for again under a new URL */
+    var st=setTimeout(again,7000);
+    p.onload=function(){clearTimeout(st);done=true;if(src!==u)v.setAttribute("poster",src);};
+    p.onerror=function(){clearTimeout(st);again();};p.src=src;})(u);}
+/* v4t: stalled-image watchdog. On some connections a request is neither answered nor failed (it just hangs), so the
+   error-retry above never fires and the box stays empty. Every 3 s: an image near the screen that has been waiting
+   more than 7 s is asked for again under a new URL (up to 3 times). */
+setInterval(function(){var now=Date.now(),vh=innerHeight;
+  [].forEach.call(d.images,function(im){
+    if(im.complete||!im.getAttribute("src")||/^data:/.test(im.getAttribute("src")))return;
+    var r=im.getBoundingClientRect();if(r.bottom<-600||r.top>vh+600)return;
+    if(!im._ws){im._ws=now;return;}
+    if(now-im._ws<7000||(im._st||0)>=3)return;
+    im._st=(im._st||0)+1;im._ws=now;
+    var u=im._rtSrc||im.currentSrc||im.getAttribute("src");im._rtSrc=u;
+    im.removeAttribute("srcset");im.removeAttribute("sizes");im.loading="eager";im.src=mBust(u,10+im._st);
+  });
+},3000);
 
 /* ---------- content drop-ins (content.js) ---------- */
 /* founder photo */
@@ -58,6 +76,7 @@ if(svRow&&svRow.querySelector("video")){
     svVids.push(v);
   });
   svRow.hidden=false;
+  svVids.forEach(function(v){posterCheck(v);v._pc=1;});
 }else if(SV.length&&svRow){
   SV.forEach(function(s,i){
     var f=el("figure","svc rv"),fr=el("div","svc-frame"),v=d.createElement("video");
@@ -229,7 +248,7 @@ if(svVids.length){
   var svRowNear=false,svGo=false;
   function svStart(){
     if(svGo)return;svGo=true;
-    svVids.forEach(posterCheck);
+    svVids.forEach(function(v){if(!v._pc)posterCheck(v);});
     if(!IO){svVids.forEach(function(v){v._on=true;svLoad(v);});return;}
     /* play/pause by on-screen visibility (clipped by the swipe row, so hidden tiles read as off screen) */
     var vIO=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;v._on=e.isIntersecting;if(v._on)svPlay(v);else if(!v.paused)v.pause();});},{threshold:.35});
