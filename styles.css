@@ -505,3 +505,10 @@ section.svc-sec{padding:28px 0 8px}
  .svc-row{grid-auto-flow:row;grid-template-columns:repeat(4,1fr);grid-auto-columns:auto;gap:20px;overflow:visible;margin:0;padding:0;scroll-snap-type:none}
  section.svc-sec{padding:48px 0 16px}
 }
+
+/* footer social */
+.f-social{margin-top:18px;display:flex;justify-content:center;gap:14px}
+.f-social a{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(24,110,255,.13);box-shadow:inset 0 0 0 1px rgba(110,140,255,.4);transition:background .2s,box-shadow .2s}
+.f-social .bi{width:22px;height:22px;fill:none;stroke:#8fc0ff;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.f-social a:hover{background:rgba(24,110,255,.24);box-shadow:inset 0 0 0 1px rgba(150,170,255,.7)}
+.f-social a:hover .bi{stroke:#fff}
