@@ -1,5 +1,5 @@
 
-@font-face{font-family:"Montserrat";src:url(assets/montserrat.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Montserrat";src:url(assets/montserrat.woff2?v=4p) format("woff2");font-weight:100 900;font-display:swap}
 :root{--bg:#02020b;--navy:#0a1446;--blue:#186eff;--purple:#b634ff;--cyan:#1ed4ff;--txt:#fff;--mute:#aab4d9;--line:rgba(140,160,255,.16);
 --grad:linear-gradient(90deg,#1ed4ff 0%,#186eff 38%,#8a3dff 72%,#c43cff 100%);--pad:20px;--max:1120px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -279,7 +279,7 @@ footer p{margin-top:22px;font-size:13px;color:var(--mute);font-weight:500;letter
 .cases{margin-top:36px;display:flex;flex-wrap:wrap;justify-content:center;gap:22px}
 .case{position:relative;flex:0 0 100%;min-width:0;display:flex;flex-direction:column;overflow:hidden;transition:transform .35s ease,box-shadow .35s ease}
 .case:hover,.case.tap,.case:focus-within{transform:translateY(-4px);box-shadow:0 26px 60px -22px rgba(100,80,255,.9)}
-.case-cover{aspect-ratio:3 / 2;overflow:hidden;background:#05051a;border-radius:17px 17px 0 0}
+.case-cover{aspect-ratio:3 / 2;overflow:hidden;background:#05051a center / cover no-repeat;border-radius:17px 17px 0 0}
 .case-cover img{width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.2,.7,.1,1)}
 .case:hover .case-cover img{transform:scale(1.04)}
 .case-body{flex:1;display:flex;flex-direction:column;align-items:flex-start;padding:20px 20px 22px}
@@ -521,3 +521,6 @@ section.svc-sec{padding:28px 0 8px}
  .shine{opacity:0}
  .js .rv{opacity:1!important;transform:none!important;transition:none!important}
 }
+
+/* media that failed and is being retried: hide the broken-image icon (the placeholder or frame shows instead) */
+img.rt{visibility:hidden}

@@ -21,13 +21,14 @@
 <meta name="twitter:title" content="SYNQWAVE | Creative Design &amp; Branding Studio in Nagpur">
 <meta name="twitter:description" content="SYNQWAVE is a small design studio in Nagpur, Maharashtra. Brand identity, packaging and labels, social media design and print design for growing businesses.">
 <meta name="twitter:image" content="https://synqwave.co/og.jpg">
-<link rel="icon" href="assets/favicon.png">
-<link rel="preload" href="assets/montserrat.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/synqwave-logo.webp" as="image" fetchpriority="high">
-<link rel="stylesheet" href="styles.css?v=4o">
+<link rel="icon" href="assets/favicon.png?v=4p">
+<link rel="preload" href="assets/montserrat.woff2?v=4p" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/synqwave-logo.webp?v=4p" as="image" fetchpriority="high">
+<link rel="preload" href="assets/video/branding.webp?v=4p" as="image">
+<link rel="stylesheet" href="styles.css?v=4p">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "LocalBusiness", "name": "SYNQWAVE", "description": "SYNQWAVE is a small design studio in Nagpur, Maharashtra. Brand identity, packaging and labels, social media design and print design for growing businesses.", "url": "https://synqwave.co/", "image": "https://synqwave.co/og.jpg", "logo": "https://synqwave.co/og.jpg", "telephone": "+91 92093 39989", "email": "synqwave.business@gmail.com", "address": {"@type": "PostalAddress", "addressLocality": "Nagpur", "addressRegion": "Maharashtra", "addressCountry": "IN"}, "founder": {"@type": "Person", "name": "Talmeez Ahmad"}}</script>
-<script src="content.js?v=4o" defer></script>
-<script src="main.js?v=4o" defer></script>
+<script src="content.js?v=4p" defer></script>
+<script src="main.js?v=4p" defer></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -43,7 +44,7 @@
 
 <header class="nav" id="nav">
   <div class="wrap nav-in">
-    <a class="brand" href="#home" aria-label="SYNQWAVE home"><img src="assets/synqwave-wordmark.webp" alt="SYNQWAVE" width="560" height="58"></a>
+    <a class="brand" href="#home" aria-label="SYNQWAVE home"><img src="assets/synqwave-wordmark.webp?v=4p" alt="SYNQWAVE" width="560" height="58"></a>
     <nav class="links" aria-label="Main">
       <a href="#work">Work</a><a href="#services">Services</a><a href="#packages">Packages</a><a href="#process">Process</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
     </nav>
@@ -71,7 +72,7 @@
   <canvas class="hero-waves" id="waves" aria-hidden="true"></canvas>
   <div class="hero-glow" aria-hidden="true"></div>
   <div class="wrap hero-in">
-    <div class="logo-wrap"><img class="logo" src="assets/synqwave-logo.webp" fetchpriority="high" alt="SYNQWAVE logo: Ideas in sync. Brands in motion." width="1086" height="167"><span class="shine" aria-hidden="true"></span></div>
+    <div class="logo-wrap"><img class="logo" src="assets/synqwave-logo.webp?v=4p" fetchpriority="high" alt="SYNQWAVE logo: Ideas in sync. Brands in motion." width="1086" height="167"><span class="shine" aria-hidden="true"></span></div>
     <h1 class="headline"><span class="ln ln1">Design that feels like</span> <span class="ln ln2"><span class="grad-anim">your brand,</span> everywhere.</span></h1>
     <p class="lead">We're SYNQWAVE, a small design studio in Nagpur. We help growing businesses look sharp on social media, in print and on packaging.</p>
     <div class="cta hero-cta">
@@ -85,7 +86,12 @@
 <section class="svc-sec" id="services-video" aria-label="Services">
   <div class="wrap">
     <!-- Service videos (right after the hero): set serviceVideos in content.js. Hidden while empty. -->
-    <div class="svc-row" id="svc-row" hidden></div>
+    <div class="svc-row" id="svc-row">
+      <figure class="svc rv"><div class="svc-frame"><video muted loop playsinline preload="none" aria-hidden="true" width="1080" height="1080" poster="assets/video/branding.webp?v=4p" data-src="assets/video/branding-d.mp4?v=4p" data-src-m="assets/video/branding-p.mp4?v=4p"></video></div><figcaption>Branding</figcaption></figure>
+      <figure class="svc rv"><div class="svc-frame"><video muted loop playsinline preload="none" aria-hidden="true" width="1080" height="1080" poster="assets/video/packaging.webp?v=4p" data-src="assets/video/packaging-d.mp4?v=4p" data-src-m="assets/video/packaging-p.mp4?v=4p"></video></div><figcaption>Packaging</figcaption></figure>
+      <figure class="svc rv"><div class="svc-frame"><video muted loop playsinline preload="none" aria-hidden="true" width="1080" height="1080" poster="assets/video/print.webp?v=4p" data-src="assets/video/print-d.mp4?v=4p" data-src-m="assets/video/print-p.mp4?v=4p"></video></div><figcaption>Print</figcaption></figure>
+      <figure class="svc rv"><div class="svc-frame"><video muted loop playsinline preload="none" aria-hidden="true" width="1080" height="1080" poster="assets/video/social.webp?v=4p" data-src="assets/video/social-d.mp4?v=4p" data-src-m="assets/video/social-p.mp4?v=4p"></video></div><figcaption>Social Media</figcaption></figure>
+      </div>
   </div>
 </section>
 
@@ -106,26 +112,30 @@
       </ul>
     </div>
     <figure class="founder rv" id="founder">
-      <div class="founder-frame" id="founder-frame">
-        <img class="waves drift" src="assets/waves-band.svg" alt="" aria-hidden="true">
-        <img class="founder-logo" src="assets/synqwave-logo.webp" alt="SYNQWAVE logo" width="1086" height="167" loading="lazy">
-      </div>
+      <div class="founder-frame has-photo" id="founder-frame"><img class="founder-photo" src="assets/founder-talmeez-v3.webp?v=4p" alt="Talmeez Ahmad, founder of SYNQWAVE" width="800" height="1000" loading="lazy" decoding="async"></div>
       <figcaption><b>Talmeez Ahmad</b><span>Founder, SYNQWAVE</span></figcaption>
     </figure>
   </div>
 </section>
 
-<div class="band-wrap" aria-hidden="true"><img class="band drift" src="assets/waves-band.svg" alt=""></div>
+<div class="band-wrap" aria-hidden="true"><img class="band drift" src="assets/waves-band.svg?v=4p" alt=""></div>
 
 <section class="work" id="work">
   <div class="wrap">
     <div class="rv">
       <span class="kicker">Work</span>
       <h2 class="h2">Selected <span class="grad">projects</span></h2>
-      <p class="intro" id="work-intro" hidden>Recent work, followed by a few self-initiated concept projects (marked). Ask us on WhatsApp for more samples.</p>
+      <p class="intro" id="work-intro">Recent work, followed by a few self-initiated concept projects (marked). Ask us on WhatsApp for more samples.</p>
     </div>
     <!-- Case studies: add entries to caseStudies in content.js. -->
-    <div class="cases" id="cases" hidden></div>
+    <div class="cases" id="cases">
+      <article class="case panel rv"><div class="case-cover" style="background-image:url(data:image/webp;base64,UklGRp4AAABXRUJQVlA4IJIAAABQBACdASoYAA4APtFUo0uoJKMhsAgBABoJQBYdu4AfQJEcuf7l2+jeCGsYAP7qmX1+LRCxaPoicd1IzbORAlwWl8FFZFWvBqL8cVp3QYJem+9w/KxShq/qaAyPtUkChSALHzMQZc3c6/VvMxNwqne/zQXeJGQkImUr2otgqTSznGX/DY44MQPZO9gzTNVIdQAAAA==)"><img src="assets/work/pretty-please-1.webp?v=4p" srcset="assets/work/pretty-please-1-640.webp?v=4p 640w, assets/work/pretty-please-1-1000.webp?v=4p 1000w, assets/work/pretty-please-1.webp?v=4p 1400w" sizes="(min-width:1280px) 544px, (min-width:1024px) 45vw, (min-width:768px) 44vw, calc(100vw - 42px)" alt="Pretty Please stationery and merchandise: tote bag, letterhead, business cards, tags, notebook and envelope" width="1200" height="800" loading="lazy" decoding="async"></div><div class="case-body"><span class="tag tag-c">Brand identity</span><h3>Pretty Please</h3><p class="case-ind">Logo system, stationery and merchandise</p><button class="case-open" type="button" aria-haspopup="dialog" aria-label="View project: Pretty Please"><span>View project</span><span class="case-ar" aria-hidden="true">→</span></button></div></article>
+      <article class="case panel rv"><div class="case-cover" style="background-image:url(data:image/webp;base64,UklGRnQAAABXRUJQVlA4IGgAAAAwBACdASoYAA4APtFUo0uoJKMhsAgBABoJZADCgCFT5ohjEtjvL+4AwgAA/vTT2JtzGeVG0Gz0WuDWd58Xpb6fbUT5bNNGEHaqAtt7n0sPLIM7RaYcHmtIyVuV4dxYpBEVJTvU9q3gAA==)"><img src="assets/work/liberty-perfume-1.webp?v=4p" srcset="assets/work/liberty-perfume-1-640.webp?v=4p 640w, assets/work/liberty-perfume-1.webp?v=4p 1052w" sizes="(min-width:1280px) 544px, (min-width:1024px) 45vw, (min-width:768px) 44vw, calc(100vw - 42px)" alt="Liberty Perfumes bottle and coral box" width="1200" height="800" loading="lazy" decoding="async"></div><div class="case-body"><span class="tag tag-c">Packaging &amp; print</span><h3>Liberty Perfume</h3><p class="case-ind">Bottle and box, stationery, carry bags and posters</p><button class="case-open" type="button" aria-haspopup="dialog" aria-label="View project: Liberty Perfume"><span>View project</span><span class="case-ar" aria-hidden="true">→</span></button></div></article>
+      <article class="case panel rv"><div class="case-cover" style="background-image:url(data:image/webp;base64,UklGRr4AAABXRUJQVlA4ILIAAACQBACdASoYABAAPtFUo0uoJKMhsAgBABoJQBOmUABiAoUyDN0lt2Y9w6y7CgAA/k6ZhreCXz8fuR4HGTTnWf8z1+unEBMf2KKT6RI1qYEill23q5fLAJsM7BfTAdtgqwMMdl1PXv7+Zf69fcd3BHrZgH6i0u9yMxxzWXvNs2ZeSyM+qExsugToSSXe3sWJvydIxT8PKrzsunwcgs47O2hjz7FhwWQtzznzNCIfChO4AAAA)"><img src="assets/work/adrak-lane-storefront.webp?v=4p" srcset="assets/work/adrak-lane-storefront-640.webp?v=4p 640w, assets/work/adrak-lane-storefront-1000.webp?v=4p 1000w, assets/work/adrak-lane-storefront.webp?v=4p 1200w" sizes="(min-width:1280px) 544px, (min-width:1024px) 45vw, (min-width:768px) 44vw, calc(100vw - 42px)" alt="Adrak Lane Chai Co. shopfront at dusk with a cream hanging signboard showing the kulhad cup logo" width="1200" height="800" loading="lazy" decoding="async"></div><div class="case-body"><span class="tag tag-c">Concept project</span><h3>Adrak Lane Chai Co.</h3><p class="case-ind">Café / Chai bar</p><button class="case-open" type="button" aria-haspopup="dialog" aria-label="View case study: Adrak Lane Chai Co."><span>View case study</span><span class="case-ar" aria-hidden="true">→</span></button></div></article>
+      <article class="case panel rv"><div class="case-cover" style="background-image:url(data:image/webp;base64,UklGRswAAABXRUJQVlA4IMAAAABQBACdASoYABAAPtFUo0uoJKMhsAgBABoJYgCdL1yBT8s0N9AG/rJc09bgAP7WGOJHsMzk19i+Rig5xd+73TxUyASQbNuBv1pWxG8Sw8UtSFnWvHiTnVTFOYwcyz68PL8nzZmlVHur/P9lzt/3BRjXMSq0zH/YF/cWVmqynH6B4D+fmd4CAg8vwtMYRZAwc3RMnHCxh3XbalKThiji3ywwFnvYklNTGf+at//7NfvImjQOZR+6AKQFITjOqKIAAAA=)"><img src="assets/work/saoji-pantry-pouches.webp?v=4p" srcset="assets/work/saoji-pantry-pouches-640.webp?v=4p 640w, assets/work/saoji-pantry-pouches-1000.webp?v=4p 1000w, assets/work/saoji-pantry-pouches.webp?v=4p 1200w" sizes="(min-width:1280px) 544px, (min-width:1024px) 45vw, (min-width:768px) 44vw, calc(100vw - 42px)" alt="Saoji Pantry kraft spice pouches for Saoji Masala, Kala Masala and Garam Masala on a slate counter" width="1200" height="800" loading="lazy" decoding="async"></div><div class="case-body"><span class="tag tag-c">Concept project</span><h3>Saoji Pantry</h3><p class="case-ind">Packaged food / Spice blends</p><button class="case-open" type="button" aria-haspopup="dialog" aria-label="View case study: Saoji Pantry"><span>View case study</span><span class="case-ar" aria-hidden="true">→</span></button></div></article>
+      <article class="case panel rv"><div class="case-cover" style="background-image:url(data:image/webp;base64,UklGRtwAAABXRUJQVlA4INAAAAAwBQCdASoYABAAPtFUo0uoJKMhsAgBABoJbACdMoR3JoBXge40sgFpGbXjstZpvj41QAD+mSlUsVJ9b5jkky+yFO72lkNiKXL7bc4aSKoakzOlOAMz0KmLMnqn6kvvki+B6ynaS/6uFAertUZ+pbpZxh6+MmPsHdLVWz6zyyx4vMfcX9+QyezzeZrdF0P6iprGetba8L24LxiYM0rd8vPPzypk9OzCnXhsmI01a2CTjyidG6sYMWQgGRJj0yfKnugvgs9MUCLX+YjShyFeAsgA)"><img src="assets/work/narangi-house-box.webp?v=4p" srcset="assets/work/narangi-house-box-640.webp?v=4p 640w, assets/work/narangi-house-box-1000.webp?v=4p 1000w, assets/work/narangi-house-box.webp?v=4p 1200w" sizes="(min-width:1280px) 544px, (min-width:1024px) 45vw, (min-width:768px) 44vw, calc(100vw - 42px)" alt="Narangi House ivory and orange sweet box with gold-foil logo, opened to show orange burfi" width="1200" height="800" loading="lazy" decoding="async"></div><div class="case-body"><span class="tag tag-c">Concept project</span><h3>Narangi House</h3><p class="case-ind">Sweet shop / Mithai</p><button class="case-open" type="button" aria-haspopup="dialog" aria-label="View case study: Narangi House"><span>View case study</span><span class="case-ar" aria-hidden="true">→</span></button></div></article>
+      <article class="case panel rv"><div class="case-cover" style="background-image:url(data:image/webp;base64,UklGRpgAAABXRUJQVlA4IIwAAABQBACdASoYABAAPtFUo0uoJKMhsAgBABoJQBYdhHpzzn+SnRXiMvJt+JTgAP61ZbbP1JKkyf26wBnzAxfbJDCmszAH7B+1oWTQHN59da5giThbMbIYdyKBGKHrGWoLDvSr27YGK2QIT9RZjmTXFnypVlQF40Qca2BY+UMfKU1h1TqC7ahp08QhXDQAAA==)"><img src="assets/work/kanghi-studio-reception.webp?v=4p" srcset="assets/work/kanghi-studio-reception-640.webp?v=4p 640w, assets/work/kanghi-studio-reception-1000.webp?v=4p 1000w, assets/work/kanghi-studio-reception.webp?v=4p 1200w" sizes="(min-width:1280px) 544px, (min-width:1024px) 45vw, (min-width:768px) 44vw, calc(100vw - 42px)" alt="Kanghi Hair &amp; Skin Studio reception with the logo on a blush-pink wall above an oak desk" width="1200" height="800" loading="lazy" decoding="async"></div><div class="case-body"><span class="tag tag-c">Concept project</span><h3>Kanghi Hair &amp; Skin Studio</h3><p class="case-ind">Salon / Beauty</p><button class="case-open" type="button" aria-haspopup="dialog" aria-label="View case study: Kanghi Hair &amp; Skin Studio"><span>View case study</span><span class="case-ar" aria-hidden="true">→</span></button></div></article>
+      </div>
     <!-- Case study viewer: filled from caseStudies in content.js when a card is tapped. -->
     <dialog class="cs" id="cs" aria-labelledby="cs-title">
       <button class="cs-x" type="button" aria-label="Close case study"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -136,10 +146,6 @@
         <div class="cs-foot"><a class="btn btn-p btn-md cs-cta" href="#contact">Start a project</a></div>
       </div>
     </dialog>
-    <div class="empty panel rv" id="work-empty">
-      <p>Selected projects coming soon. Ask us on WhatsApp for samples.</p>
-      <a class="btn btn-p btn-md" href="https://wa.me/919209339989?text=Hi%20SYNQWAVE%2C%20could%20you%20share%20some%20samples%20of%20your%20work%3F" target="_blank" rel="noopener"><svg class="bi" aria-hidden="true"><use href="#i-wa"/></svg>Ask for samples</a>
-    </div>
   </div>
 </section>
 
@@ -217,7 +223,7 @@
   </div>
 </section>
 
-<div class="band-wrap" aria-hidden="true"><img class="band drift" src="assets/waves-band.svg" alt=""></div>
+<div class="band-wrap" aria-hidden="true"><img class="band drift" src="assets/waves-band.svg?v=4p" alt=""></div>
 
 <section class="process" id="process">
   <div class="wrap">
@@ -253,7 +259,7 @@
 </section>
 
 <section class="contact" id="contact">
-  <img class="waves drift" src="assets/waves-band.svg" alt="" aria-hidden="true">
+  <img class="waves drift" src="assets/waves-band.svg?v=4p" alt="" aria-hidden="true">
   <div class="wrap contact-in">
     <div class="c-info rv">
       <span class="kicker">Contact</span>
@@ -295,7 +301,7 @@
 
 <footer>
   <div class="wrap foot-in">
-    <img src="assets/synqwave-logo.webp" alt="SYNQWAVE logo" width="1086" height="167" loading="lazy">
+    <img src="assets/synqwave-logo.webp?v=4p" alt="SYNQWAVE logo" width="1086" height="167" loading="lazy">
     <p class="f-loc">Design studio in Nagpur, Maharashtra</p>
     <nav class="f-social" aria-label="Social">
       <a href="https://www.instagram.com/synqwave.studio/" target="_blank" rel="noopener" aria-label="SYNQWAVE on Instagram (opens in a new tab)"><svg class="bi" aria-hidden="true"><use href="#i-ig"/></svg></a>

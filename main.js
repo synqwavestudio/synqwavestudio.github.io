@@ -8,36 +8,72 @@ var WA="919209339989",EMAIL="synqwave.business@gmail.com";
 function el(tag,cls,txt){var e=d.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
 function waLink(t){return "https://wa.me/"+WA+"?text="+encodeURIComponent(t);}
 
+
+/* ---------- media that fails to load is fetched again ----------
+   On a weak or switching connection (mobile data <-> Wi-Fi) the browser can drop every request in flight; an image
+   that failed then shows a broken icon for good. Here a failed image is hidden (its placeholder shows) and fetched
+   again up to 4 times (1.5/4/9/20 s apart, at once when the connection comes back). */
+function mBust(u,n){u=String(u).replace(/[?&]r=\d+$/,"");return u+(u.indexOf("?")<0?"?":"&")+"r="+n;}
+function imgRetry(im){
+  var n=im._rt||0,u=im._rtSrc||im.currentSrc||im.getAttribute("src");
+  if(!u||/^data:|\.svg(\?|$)/.test(u))return;
+  im._rtSrc=u;im.classList.add("rt");
+  if(n>=4)return;im._rt=n+1;
+  clearTimeout(im._rtT);
+  im._rtT=setTimeout(function(){im.removeAttribute("srcset");im.removeAttribute("sizes");im.loading="eager";im.src=mBust(u,n+1);},navigator.onLine===false?600000:[1500,4000,9000,20000][n]);
+}
+d.addEventListener("error",function(e){var t=e.target;if(t&&t.tagName==="IMG")imgRetry(t);},true);
+d.addEventListener("load",function(e){var t=e.target;if(t&&t.tagName==="IMG"&&t._rtSrc){t.classList.remove("rt");t._rtSrc=null;}},true);
+function imgScan(){[].forEach.call(d.images,function(im){if(im.complete&&im.getAttribute("src")&&!im.naturalWidth)imgRetry(im);});}
+imgScan();
+addEventListener("online",function(){[].forEach.call(d.images,function(im){if(im._rtSrc&&im._rt<4){clearTimeout(im._rtT);im.removeAttribute("srcset");im.src=mBust(im._rtSrc,++im._rt);}});
+  svVids.forEach(function(v){if(v.error&&v._src){v.src=mBust(v._src,9);v.load();svPlay(v);}});});
+/* posters: if a poster failed, fetch it again */
+function posterCheck(v){var u=v.getAttribute("poster");if(!u)return;var k=0;
+  (function tryP(src){var p=new Image();p.onload=function(){if(src!==u)v.setAttribute("poster",src);};
+    p.onerror=function(){if(k<4){k++;setTimeout(function(){tryP(mBust(u,k));},[1500,4000,9000,20000][k-1]);}};p.src=src;})(u);}
+
 /* ---------- content drop-ins (content.js) ---------- */
 /* founder photo */
-if(C.founderPhoto){var ff=d.getElementById("founder-frame");if(ff){ff.innerHTML="";var fi=el("img","founder-photo");fi.src=C.founderPhoto;fi.alt="Talmeez Ahmad, founder of SYNQWAVE";fi.loading="lazy";fi.decoding="async";ff.appendChild(fi);ff.classList.add("has-photo");}}
+if(C.founderPhoto&&!d.querySelector(".founder-photo")){var ff=d.getElementById("founder-frame");if(ff){ff.innerHTML="";var fi=el("img","founder-photo");fi.src=C.founderPhoto;fi.alt="Talmeez Ahmad, founder of SYNQWAVE";fi.loading="lazy";fi.decoding="async";ff.appendChild(fi);ff.classList.add("has-photo");}}
 /* service videos: 4 tiles, lazy. Source by width: <900px the light phone file (srcM, 810px), >=900px the desktop file (src, 1080px).
    Tiles are at most ~300 CSS px wide on desktop and ~78vw on phones, so these sizes stay sharp; no 4K download.
    No src at page load (poster only, preload=none); src is set near the viewport after window load (see "service videos: lazy load" below). */
 var SV=(C.serviceVideos||[]).filter(function(v){return v&&v.src;});
 var svRow=d.getElementById("svc-row");
 var svVids=[];
-if(SV.length&&svRow){
-  var vw=window.innerWidth||root.clientWidth;
-  var svMob=vw<900;
+var cn=navigator.connection||{};
+var svLite=!!(cn.saveData||/(^|-)2g$/.test(cn.effectiveType||""));
+var vw=window.innerWidth||root.clientWidth;
+var svMob=vw<900;
+if(svRow&&svRow.querySelector("video")){
+  /* tiles are written in index.html (poster shows without JS); pick the file by width; Data Saver / 2G: the light file everywhere */
+  [].forEach.call(svRow.querySelectorAll("video"),function(v){
+    v._src=(svMob||svLite)?(v.getAttribute("data-src-m")||v.getAttribute("data-src")):v.getAttribute("data-src");
+    svVids.push(v);
+  });
+  svRow.hidden=false;
+}else if(SV.length&&svRow){
   SV.forEach(function(s,i){
     var f=el("figure","svc rv"),fr=el("div","svc-frame"),v=d.createElement("video");
     v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;v.preload="none";
     ["muted","loop","playsinline"].forEach(function(a){v.setAttribute(a,"");});
     v.setAttribute("preload","none");v.setAttribute("aria-hidden","true");v.width=1080;v.height=1080;
-    /* phones: only the first (showing) tile's poster loads with the page; the off-screen swipe tiles get theirs after load */
-    if(s.poster){if(svMob&&i>0)v._poster=s.poster;else v.poster=s.poster;}
-    v._src=svMob?(s.srcM||s.src):s.src;
+    if(s.poster)v.poster=s.poster;
+    v._src=(svMob||svLite)?(s.srcM||s.src):s.src;
     fr.appendChild(v);f.appendChild(fr);f.appendChild(el("figcaption",null,s.label||""));svRow.appendChild(f);
     svVids.push(v);
   });
   svRow.hidden=false;
 }
+
 /* case studies: card grid + case study dialog */
 var CS=(C.caseStudies||[]).filter(function(c){return c&&c.client;});
 var csOpen=null;
-if(CS.length){var box=d.getElementById("cases");
-  CS.forEach(function(c,n){
+var box=d.getElementById("cases");
+var staticCards=box?[].slice.call(box.querySelectorAll(".case")):[];
+if(CS.length&&box){
+  if(!staticCards.length)CS.forEach(function(c,n){
     var imgs=(c.images||[]).filter(function(i){return i&&i.src;});
     var a=el("article","case panel rv");
     if(imgs.length){var cv=el("div","case-cover");var im=el("img");im.src=imgs[0].src;im.alt=imgs[0].alt||(c.client+" project by SYNQWAVE");im.width=1200;im.height=800;im.loading="lazy";im.decoding="async";cv.appendChild(im);a.appendChild(cv);}
@@ -50,6 +86,8 @@ if(CS.length){var box=d.getElementById("cases");
     btn.addEventListener("click",function(){openCase(n,btn);});
     b.appendChild(btn);a.appendChild(b);box.appendChild(a);
   });
+  /* cards written in index.html (images load without JS): wire their buttons to the case study viewer */
+  staticCards.forEach(function(a,n){var btn=a.querySelector(".case-open");if(btn&&CS[n])btn.addEventListener("click",function(){openCase(n,btn);});});
   box.hidden=false;var we=d.getElementById("work-empty");if(we)we.remove();
   var wi=d.getElementById("work-intro");if(wi&&CS.some(function(c){return /concept/i.test(c.tag||"");}))wi.hidden=false;
 
@@ -169,19 +207,21 @@ function svNext(){
   svCur=v;
   function done(){if(svCur!==v)return;clearTimeout(svT);svCur=null;svNext();}
   v.addEventListener("canplaythrough",done,{once:true});v.addEventListener("error",done,{once:true});
+  v.addEventListener("error",function(){svRetry(v);});
   svT=setTimeout(done,5000);
   v.preload="auto";v.setAttribute("preload","auto");v.src=v._src;svPlay(v);
 }
+/* a failed video file (dropped connection, network switch) is fetched again: up to 4 times, 2/5/10/20 s apart; the poster stays meanwhile */
+function svRetry(v){var n=v._rt||0;if(n>=4||!v._src)return;v._rt=n+1;
+  setTimeout(function(){v.src=mBust(v._src,n+1);v.load();svPlay(v);},[2000,5000,10000,20000][n]);}
 function svLoad(v){if(v.getAttribute("src")||!v._src||v._queued)return;v._queued=true;svQ.push(v);svNext();}
 function svBusy(){for(var i=0;i<svVids.length;i++){if(!svVids[i].paused)return true;}return false;}
 if(svVids.length){
   svVids.forEach(function(v){v.muted=true;v.defaultMuted=true;v.playsInline=true;});
-  var svRowNear=false;
-  var cn=navigator.connection||{};
-  var svLite=!!(cn.saveData||/(^|-)2g$/.test(cn.effectiveType||""));
+  var svRowNear=false,svGo=false;
   function svStart(){
-    svVids.forEach(function(v){if(v._poster){v.poster=v._poster;v._poster=null;}});
-    if(svLite){svVids.forEach(function(v){v.preload="none";v.src=v._src;v.controls=true;});return;}
+    if(svGo)return;svGo=true;
+    svVids.forEach(posterCheck);
     if(!IO){svVids.forEach(function(v){v._on=true;svLoad(v);});return;}
     /* play/pause by on-screen visibility (clipped by the swipe row, so hidden tiles read as off screen) */
     var vIO=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;v._on=e.isIntersecting;if(v._on)svPlay(v);else if(!v.paused)v.pause();});},{threshold:.35});
@@ -196,7 +236,8 @@ if(svVids.length){
       svVids.forEach(function(v){lIO.observe(v);});
     }
   }
-  if(d.readyState==="complete")setTimeout(svStart,0);else addEventListener("load",function(){setTimeout(svStart,0);});
+  /* start at window load, or 1.5 s after the page is parsed if load is slow (a stuck request elsewhere must not hold the videos back) */
+  if(d.readyState==="complete")setTimeout(svStart,0);else{addEventListener("load",function(){setTimeout(svStart,0);});setTimeout(svStart,1500);}
 }
 
 /* ---------- contact form: compose WhatsApp / email ---------- */
