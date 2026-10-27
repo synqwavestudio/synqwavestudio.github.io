@@ -11,23 +11,23 @@ function waLink(t){return "https://wa.me/"+WA+"?text="+encodeURIComponent(t);}
 /* ---------- content drop-ins (content.js) ---------- */
 /* founder photo */
 if(C.founderPhoto){var ff=d.getElementById("founder-frame");if(ff){ff.innerHTML="";var fi=el("img","founder-photo");fi.src=C.founderPhoto;fi.alt="Talmeez Ahmad, founder of SYNQWAVE";fi.loading="lazy";fi.decoding="async";ff.appendChild(fi);ff.classList.add("has-photo");}}
-/* service videos: 4 tiles, lazy. Source by width: <900px light 1080 file (-m), 900-1199 the 1440 file, >=1200 (or dense wide tiles) the 4K file.
+/* service videos: 4 tiles, lazy. Source by width: <900px the light phone file (srcM, 810px), >=900px the desktop file (src, 1080px).
+   Tiles are at most ~300 CSS px wide on desktop and ~78vw on phones, so these sizes stay sharp; no 4K download.
    No src at page load (poster only, preload=none); src is set near the viewport after window load (see "service videos: lazy load" below). */
 var SV=(C.serviceVideos||[]).filter(function(v){return v&&v.src;});
 var svRow=d.getElementById("svc-row");
 var svVids=[];
 if(SV.length&&svRow){
-  var vw=window.innerWidth||root.clientWidth,dpr=window.devicePixelRatio||1;
+  var vw=window.innerWidth||root.clientWidth;
   var svMob=vw<900;
-  var tileW=vw>=900?Math.min(vw,1240)/4:vw*.78;
-  var use4k=!svMob&&(vw>=1200||dpr*tileW>=1400);
-  SV.forEach(function(s){
+  SV.forEach(function(s,i){
     var f=el("figure","svc rv"),fr=el("div","svc-frame"),v=d.createElement("video");
     v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;v.preload="none";
     ["muted","loop","playsinline"].forEach(function(a){v.setAttribute(a,"");});
     v.setAttribute("preload","none");v.setAttribute("aria-hidden","true");v.width=1080;v.height=1080;
-    if(s.poster)v.poster=s.poster;
-    v._src=svMob?(s.srcM||s.src):((use4k&&s.src4k)?s.src4k:s.src);
+    /* phones: only the first (showing) tile's poster loads with the page; the off-screen swipe tiles get theirs after load */
+    if(s.poster){if(svMob&&i>0)v._poster=s.poster;else v.poster=s.poster;}
+    v._src=svMob?(s.srcM||s.src):s.src;
     fr.appendChild(v);f.appendChild(fr);f.appendChild(el("figcaption",null,s.label||""));svRow.appendChild(f);
     svVids.push(v);
   });
@@ -155,17 +155,33 @@ d.addEventListener("touchstart",function(e){var t=e.target.closest&&e.target.clo
 
 /* service videos: lazy load + play only while on screen (also under reduced motion / battery saver).
    - nothing downloads before window "load"
-   - grid (>=900px): src is set when a tile comes within ~200px of the viewport
-   - phone swipe row (<900px): src is set only for the tile that is actually showing in the row (>=55% visible) once the row is near the viewport,
-     so scrolling to the section loads one file and each swipe loads the next; off-screen tiles pause and keep their src (no reload on swipe back) */
+   - one file at a time: the next tile's file starts only when the current one can play (or after 5 s), so the first video
+     starts fast and images further down are not starved of bandwidth
+   - grid (>=900px): a tile joins the queue when it comes within ~200px of the viewport
+   - phone swipe row (<900px): only the tile that is actually showing in the row (>=55% visible) joins, once the row is near the viewport;
+     off-screen tiles pause and keep their src (no reload on swipe back)
+   - Data Saver / 2G: no automatic download; the poster shows with play controls */
 function svPlay(v){if(!v._on||!v.getAttribute("src"))return;var p=v.play();if(p&&p.catch)p.catch(function(){if(v._on&&v.paused)v.controls=true;});}
-function svLoad(v){if(v.getAttribute("src")||!v._src)return;v.preload="auto";v.setAttribute("preload","auto");v.src=v._src;svPlay(v);}
+var svQ=[],svCur=null,svT=0;
+function svNext(){
+  if(svCur)return;
+  var v=svQ.shift();if(!v)return;
+  svCur=v;
+  function done(){if(svCur!==v)return;clearTimeout(svT);svCur=null;svNext();}
+  v.addEventListener("canplaythrough",done,{once:true});v.addEventListener("error",done,{once:true});
+  svT=setTimeout(done,5000);
+  v.preload="auto";v.setAttribute("preload","auto");v.src=v._src;svPlay(v);
+}
+function svLoad(v){if(v.getAttribute("src")||!v._src||v._queued)return;v._queued=true;svQ.push(v);svNext();}
 function svBusy(){for(var i=0;i<svVids.length;i++){if(!svVids[i].paused)return true;}return false;}
 if(svVids.length){
   svVids.forEach(function(v){v.muted=true;v.defaultMuted=true;v.playsInline=true;});
-  var svReady=false,svRowNear=false;
+  var svRowNear=false;
+  var cn=navigator.connection||{};
+  var svLite=!!(cn.saveData||/(^|-)2g$/.test(cn.effectiveType||""));
   function svStart(){
-    svReady=true;
+    svVids.forEach(function(v){if(v._poster){v.poster=v._poster;v._poster=null;}});
+    if(svLite){svVids.forEach(function(v){v.preload="none";v.src=v._src;v.controls=true;});return;}
     if(!IO){svVids.forEach(function(v){v._on=true;svLoad(v);});return;}
     /* play/pause by on-screen visibility (clipped by the swipe row, so hidden tiles read as off screen) */
     var vIO=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;v._on=e.isIntersecting;if(v._on)svPlay(v);else if(!v.paused)v.pause();});},{threshold:.35});
@@ -292,15 +308,18 @@ if(cv&&cv.getContext){
   }
   function start(){if(!raf&&onScreen&&!d.hidden){last=0;raf=requestAnimationFrame(frame);}}
   function stop(){if(raf){cancelAnimationFrame(raf);raf=0;}}
-  function update(){if(onScreen&&!d.hidden)start();else stop();}
   var rsT=0;function onResize(){clearTimeout(rsT);size();rsT=setTimeout(size,200);}
   addEventListener("resize",onResize);
   addEventListener("orientationchange",function(){setTimeout(size,250);});
   if(window.ResizeObserver)new ResizeObserver(function(){size();}).observe(cv);
   size();
+  /* the first frame is drawn at once (size() draws); the animation loop starts after window "load",
+     so the page's own loading and first paint are not competing with 60 fps canvas drawing on phones */
+  var wvGo=d.readyState==="complete";
+  function update(){if(wvGo&&onScreen&&!d.hidden)start();else stop();}
   if(IO)new IntersectionObserver(function(es){onScreen=es[es.length-1].isIntersecting;update();},{threshold:0}).observe(cv);
   d.addEventListener("visibilitychange",update);
   addEventListener("pageshow",update);
-  start();
+  if(wvGo)start();else addEventListener("load",function(){wvGo=true;update();});
 }
 })();
