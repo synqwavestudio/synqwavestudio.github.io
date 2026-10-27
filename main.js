@@ -187,7 +187,10 @@ function countUp(e){
 
 /* scroll reveal */
 var rvs=[].slice.call(d.querySelectorAll(".rv"));
-function reveal(x){x.classList.add("in");if(x.classList.contains("pkg")){var c=x.querySelector(".cnt");if(c)setTimeout(function(){countUp(c);},350);}}
+function reveal(x){x.classList.add("in");
+  /* phone swipe row (v4r): tiles to the right are clipped by the row, so they never "enter" the screen and stayed invisible (opacity 0)
+     until swiped, then faded in: an empty box while swiping. Reveal the whole row together with the first tile. */
+  if(x.parentNode&&x.parentNode.id==="svc-row")[].forEach.call(x.parentNode.children,function(s){if(s!==x&&s.classList.contains("rv")&&!s.classList.contains("in")){s.classList.add("in");if(typeof rIO!=="undefined"&&rIO)rIO.unobserve(s);}});if(x.classList.contains("pkg")){var c=x.querySelector(".cnt");if(c)setTimeout(function(){countUp(c);},350);}}
 if(IO){
   var rIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){reveal(e.target);rIO.unobserve(e.target);}});},{rootMargin:"0px 0px 10% 0px",threshold:0});
   rvs.forEach(function(x){rIO.observe(x);});
