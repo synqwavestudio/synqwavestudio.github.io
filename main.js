@@ -47,10 +47,14 @@ var cn=navigator.connection||{};
 var svLite=!!(cn.saveData||/(^|-)2g$/.test(cn.effectiveType||""));
 var vw=window.innerWidth||root.clientWidth;
 var svMob=vw<900;
+/* perf (v4r): the desktop grid tile is ~300 CSS px, so the 810px file is already sharper than the screen shows (even on 2x retina);
+   decode 4x 810px instead of 4x 1080px (about 45% fewer pixels to decode every frame), same picture */
+var svFr=svRow&&svRow.querySelector(".svc-frame"),svTileW=svFr?svFr.getBoundingClientRect().width:0;
+var svSmall=svMob||svLite||(svTileW>0&&svTileW*(window.devicePixelRatio||1)<=820);
 if(svRow&&svRow.querySelector("video")){
   /* tiles are written in index.html (poster shows without JS); pick the file by width; Data Saver / 2G: the light file everywhere */
   [].forEach.call(svRow.querySelectorAll("video"),function(v){
-    v._src=(svMob||svLite)?(v.getAttribute("data-src-m")||v.getAttribute("data-src")):v.getAttribute("data-src");
+    v._src=svSmall?(v.getAttribute("data-src-m")||v.getAttribute("data-src")):v.getAttribute("data-src");
     svVids.push(v);
   });
   svRow.hidden=false;
@@ -61,7 +65,7 @@ if(svRow&&svRow.querySelector("video")){
     ["muted","loop","playsinline"].forEach(function(a){v.setAttribute(a,"");});
     v.setAttribute("preload","none");v.setAttribute("aria-hidden","true");v.width=1080;v.height=1080;
     if(s.poster)v.poster=s.poster;
-    v._src=(svMob||svLite)?(s.srcM||s.src):s.src;
+    v._src=svSmall?(s.srcM||s.src):s.src;
     fr.appendChild(v);f.appendChild(fr);f.appendChild(el("figcaption",null,s.label||""));svRow.appendChild(f);
     svVids.push(v);
   });
@@ -297,22 +301,11 @@ if(form){
 /* hero waves canvas
    Always alive: under reduced motion it keeps drifting, just slower (decorative, no layout movement).
    Time-based motion (t from real elapsed time), drawn on every display frame (60 fps on phones too),
-   paused when off-screen or the tab is hidden, DPR capped for phones. */
-var cv=d.getElementById("waves");
-if(cv&&cv.getContext){
-  var ctx=cv.getContext("2d"),W=0,H=0,BW=0,BH=0,DPR=1,onScreen=true,raf=0,last=0,t=0,fc=0,SPEED=RM?.4:1;
-  function size(){
-    var r=cv.getBoundingClientRect(),w=r.width,h=r.height;
-    if(!w||!h)return false;
-    DPR=Math.min(window.devicePixelRatio||1,w<700?1.5:1.25);
-    var bw=Math.round(w*DPR),bh=Math.round(h*DPR);
-    W=w;H=h;
-    /* only touch the backing store when its size really changes (mobile URL-bar resizes would otherwise blank it) */
-    if(bw!==BW||bh!==BH){BW=bw;BH=bh;cv.width=bw;cv.height=bh;}
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-    draw();
-    return true;
-  }
+   paused when off-screen or the tab is hidden, DPR capped for phones.
+   perf (v4r): the drawing runs in a background worker (OffscreenCanvas), so the 60 fps waves no longer occupy the page's
+   main thread (measured: they kept it ~75% busy at the top of the page on a mid-range phone, making taps, scrolling and
+   video start feel slow). Same drawing code, same look. Browsers without OffscreenCanvas draw on the page as before. */
+function wavesDraw(ctx,W,H,t){
   function ribbon(cy,amp,n,spread,speed,alpha,flip){
     var g=ctx.createLinearGradient(0,0,W,0);
     g.addColorStop(0,"rgba(30,212,255,"+alpha+")");g.addColorStop(.38,"rgba(24,110,255,"+alpha+")");g.addColorStop(.72,"rgba(138,61,255,"+alpha+")");g.addColorStop(1,"rgba(196,60,255,"+alpha+")");
@@ -330,38 +323,103 @@ if(cv&&cv.getContext){
     }
     ctx.globalAlpha=1;
   }
-  function draw(){
-    if(!W||!H)return;
-    ctx.clearRect(0,0,W,H);
-    ctx.lineWidth=1;ctx.globalCompositeOperation="lighter";
-    var m=W<700,amp=Math.min(H*.09,m?44:80);
-    ribbon(H*.86,amp,m?22:34,m?70:110,.55,.55,1);
-    ribbon(H*.12,amp*.7,m?14:22,m?44:70,.4,.32,-1);
-    ctx.globalCompositeOperation="source-over";
-  }
+  if(!W||!H)return;
+  ctx.clearRect(0,0,W,H);
+  ctx.lineWidth=1;ctx.globalCompositeOperation="lighter";
+  var m=W<700,amp=Math.min(H*.09,m?44:80);
+  ribbon(H*.86,amp,m?22:34,m?70:110,.55,.55,1);
+  ribbon(H*.12,amp*.7,m?14:22,m?44:70,.4,.32,-1);
+  ctx.globalCompositeOperation="source-over";
+}
+/* the worker: owns the canvas, runs its own frame loop; the page only tells it the size, on/off and "a video is playing" */
+function wavesWorker(){
+  var cv,ctx,W=0,H=0,on=false,raf=0,last=0,t=0,fc=0,SPEED=1,busy=false;
+  var rAF=self.requestAnimationFrame?function(f){return self.requestAnimationFrame(f);}:function(f){return setTimeout(function(){f(performance.now());},16);};
+  var cAF=self.cancelAnimationFrame?function(h){self.cancelAnimationFrame(h);}:clearTimeout;
   function frame(ts){
-    raf=requestAnimationFrame(frame);
-    if(!W&&!size())return;
+    raf=rAF(frame);
     var dt=last?ts-last:0;last=ts;
-    if(dt>100)dt=100; /* after a hitch, resume smoothly instead of jumping */
+    if(dt>100)dt=100;
     t+=dt/1000*SPEED;
-    if(W<900&&svBusy()&&(fc++&1))return; /* phones: 30 fps while a service video plays */
-    draw();
+    if(W<900&&busy&&(fc++&1))return; /* phones: 30 fps while a service video plays */
+    wavesDraw(ctx,W,H,t);
   }
-  function start(){if(!raf&&onScreen&&!d.hidden){last=0;raf=requestAnimationFrame(frame);}}
-  function stop(){if(raf){cancelAnimationFrame(raf);raf=0;}}
-  var rsT=0;function onResize(){clearTimeout(rsT);size();rsT=setTimeout(size,200);}
+  self.onmessage=function(e){var m=e.data;
+    if(m.cv){cv=m.cv;ctx=cv.getContext("2d");SPEED=m.speed;}
+    if(!ctx)return;
+    if(m.w){W=m.w;H=m.h;var bw=Math.round(W*m.dpr),bh=Math.round(H*m.dpr);
+      if(cv.width!==bw||cv.height!==bh){cv.width=bw;cv.height=bh;}
+      ctx.setTransform(m.dpr,0,0,m.dpr,0,0);wavesDraw(ctx,W,H,t);}
+    if("busy" in m)busy=m.busy;
+    if("on" in m){if(m.on&&!raf){last=0;raf=rAF(frame);}else if(!m.on&&raf){cAF(raf);raf=0;}}
+  };
+}
+var cv=d.getElementById("waves");
+if(cv&&cv.getContext){
+  var SPEED=RM?.4:1,onScreen=true,wvGo=d.readyState==="complete";
+  function dims(){var r=cv.getBoundingClientRect();return {w:r.width,h:r.height,dpr:Math.min(window.devicePixelRatio||1,r.width<700?1.5:1.25)};}
+  var wk=null;
+  try{
+    if(cv.transferControlToOffscreen&&window.Worker&&window.OffscreenCanvas&&new OffscreenCanvas(1,1).getContext("2d")){
+      var wurl=URL.createObjectURL(new Blob([wavesDraw.toString()+"\n("+wavesWorker.toString()+")();"],{type:"text/javascript"}));
+      wk=new Worker(wurl);
+      var off=cv.transferControlToOffscreen();
+      wk.postMessage({cv:off,speed:SPEED},[off]);
+    }
+  }catch(e){wk=null;}
+  /* page-thread drawing: used when there is no worker, or if the worker fails (a fresh canvas replaces the transferred one) */
+  function local(){
+    var ctx=cv.getContext("2d"),W=0,H=0,BW=0,BH=0,raf=0,last=0,t=0,fc=0;
+    function frame(ts){
+      raf=requestAnimationFrame(frame);
+      if(!W&&!size())return;
+      var dt=last?ts-last:0;last=ts;
+      if(dt>100)dt=100; /* after a hitch, resume smoothly instead of jumping */
+      t+=dt/1000*SPEED;
+      if(W<900&&svBusy()&&(fc++&1))return; /* phones: 30 fps while a service video plays */
+      wavesDraw(ctx,W,H,t);
+    }
+    function size(){
+      var r=dims();if(!r.w||!r.h)return false;
+      var bw=Math.round(r.w*r.dpr),bh=Math.round(r.h*r.dpr);
+      W=r.w;H=r.h;
+      /* only touch the backing store when its size really changes (mobile URL-bar resizes would otherwise blank it) */
+      if(bw!==BW||bh!==BH){BW=bw;BH=bh;cv.width=bw;cv.height=bh;}
+      ctx.setTransform(r.dpr,0,0,r.dpr,0,0);
+      wavesDraw(ctx,W,H,t);
+      return true;
+    }
+    return {size:size,run:function(on){if(on&&!raf){last=0;raf=requestAnimationFrame(frame);}else if(!on&&raf){cancelAnimationFrame(raf);raf=0;}},busy:function(){}};
+  }
+  function remote(){
+    var lw=0,lh=0,ld=0,lb=null;
+    return {size:function(){var r=dims();if(!r.w||!r.h)return false;if(r.w!==lw||r.h!==lh||r.dpr!==ld){lw=r.w;lh=r.h;ld=r.dpr;wk.postMessage(r);}return true;},
+      run:function(on){wk.postMessage({on:on});},
+      busy:function(){var b=svBusy();if(b!==lb){lb=b;wk.postMessage({busy:b});}}};
+  }
+  var drv=wk?remote():local();
+  if(wk)wk.onerror=function(){ /* worker could not start: draw on the page instead, nothing visible changes */
+    wk.terminate();var n=cv.cloneNode(false);cv.parentNode.replaceChild(n,cv);cv=n;if(rso){rso.disconnect();rso.observe(cv);}if(wio){wio.disconnect();wio.observe(cv);}drv=local();drv.size();update();};
+  function update(){drv.run(!!(wvGo&&onScreen&&!d.hidden));}
+  var rsT=0;function onResize(){clearTimeout(rsT);drv.size();rsT=setTimeout(function(){drv.size();},200);}
   addEventListener("resize",onResize);
-  addEventListener("orientationchange",function(){setTimeout(size,250);});
-  if(window.ResizeObserver)new ResizeObserver(function(){size();}).observe(cv);
-  size();
-  /* the first frame is drawn at once (size() draws); the animation loop starts after window "load",
+  addEventListener("orientationchange",function(){setTimeout(function(){drv.size();},250);});
+  var rso=window.ResizeObserver?new ResizeObserver(function(){drv.size();}):null;if(rso)rso.observe(cv);
+  drv.size();
+  /* the first frame is drawn at once; the animation loop starts after window "load",
      so the page's own loading and first paint are not competing with 60 fps canvas drawing on phones */
-  var wvGo=d.readyState==="complete";
-  function update(){if(wvGo&&onScreen&&!d.hidden)start();else stop();}
-  if(IO)new IntersectionObserver(function(es){onScreen=es[es.length-1].isIntersecting;update();},{threshold:0}).observe(cv);
+  var wio=IO?new IntersectionObserver(function(es){onScreen=es[es.length-1].isIntersecting;update();},{threshold:0}):null;if(wio)wio.observe(cv);
   d.addEventListener("visibilitychange",update);
   addEventListener("pageshow",update);
-  if(wvGo)start();else addEventListener("load",function(){wvGo=true;update();});
+  svVids.forEach(function(v){v.addEventListener("play",function(){drv.busy();});v.addEventListener("pause",function(){drv.busy();});});
+  if(wvGo)update();else addEventListener("load",function(){wvGo=true;update();});
+}
+
+/* perf (v4r): looping CSS effects (wave bands, glowing package border, gradient headline, button pulse, scroll cue) pause
+   while they are off screen and resume where they were when they come back, so nothing visible changes;
+   before, all of them kept the page busy every frame even when you were looking at another section */
+if(IO){
+  var aIO=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle("anim-off",!e.isIntersecting);});},{rootMargin:"100px 0px"});
+  [].forEach.call(d.querySelectorAll(".drift,.pkg.feat,.grad-anim,.hero-glow,.pulse,.scroll"),function(x){aIO.observe(x);});
 }
 })();

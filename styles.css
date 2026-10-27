@@ -524,3 +524,6 @@ section.svc-sec{padding:28px 0 8px}
 
 /* media that failed and is being retried: hide the broken-image icon (the placeholder or frame shows instead) */
 img.rt{visibility:hidden}
+
+/* perf (v4r): looping effects pause while off screen (main.js adds .anim-off); they resume where they were */
+.anim-off,.anim-off::before,.anim-off::after,.anim-off .ring{animation-play-state:paused!important}
