@@ -371,6 +371,7 @@ footer p{margin-top:22px;font-size:13px;color:var(--mute);font-weight:500;letter
 .c-list div{min-width:0;display:flex;flex-direction:column;gap:1px}
 .c-list span{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#aab4d9}
 .c-list a,.c-list p{font-size:16px;font-weight:700;color:#fff;overflow-wrap:anywhere}
+.c-list a.c-em{font-size:clamp(13px,3.9vw,16px);overflow-wrap:normal;word-break:normal}
 .form{padding:24px 20px;display:grid;gap:16px}
 .fld{display:grid;gap:7px;min-width:0}
 .fld2{display:grid;gap:16px}
