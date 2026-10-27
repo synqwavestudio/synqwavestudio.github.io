@@ -146,7 +146,7 @@ function countUp(e){
 var rvs=[].slice.call(d.querySelectorAll(".rv"));
 function reveal(x){x.classList.add("in");if(x.classList.contains("pkg")){var c=x.querySelector(".cnt");if(c)setTimeout(function(){countUp(c);},350);}}
 if(IO){
-  var rIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){reveal(e.target);rIO.unobserve(e.target);}});},{rootMargin:"0px 0px -8% 0px",threshold:.12});
+  var rIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){reveal(e.target);rIO.unobserve(e.target);}});},{rootMargin:"0px 0px 10% 0px",threshold:0});
   rvs.forEach(function(x){rIO.observe(x);});
 }else{rvs.forEach(function(x){x.classList.add("in");});}
 

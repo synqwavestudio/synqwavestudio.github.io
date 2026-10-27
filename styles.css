@@ -70,19 +70,20 @@ body.lock{overflow:hidden}
  background:radial-gradient(closest-side,rgba(60,70,255,.32),rgba(150,50,255,.14) 55%,transparent 75%);animation:breathe 7s ease-in-out infinite alternate}
 @keyframes breathe{from{opacity:.65}to{opacity:1}}
 .hero-in{display:flex;flex-direction:column;align-items:center;text-align:center}
-.logo-wrap{position:relative;width:100%;max-width:640px;margin:0 auto;overflow:hidden;animation:logoIn 1.4s cubic-bezier(.2,.7,.1,1) .15s both}
+.logo-wrap{position:relative;width:100%;max-width:640px;margin:0 auto;overflow:hidden;animation:logoIn .45s cubic-bezier(.2,.7,.1,1) 0s both}
 .logo{display:block;width:100%;height:auto;margin:0 auto}
-@keyframes logoIn{from{clip-path:inset(0 50% 0 50%);opacity:0;filter:blur(6px);transform:scale(.96)}60%{opacity:1;filter:blur(0)}to{clip-path:inset(0 0 0 0);opacity:1;filter:none;transform:none}}
-.shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);mix-blend-mode:overlay;transform:translateX(-120%);animation:shine 1.6s ease-in-out 1.3s both;pointer-events:none}
+@keyframes logoIn{from{opacity:.5;transform:scale(.985)}to{opacity:1;transform:none}}
+.shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);mix-blend-mode:overlay;transform:translateX(-120%);animation:shine 1s ease-in-out .5s both;pointer-events:none}
 @keyframes shine{to{transform:translateX(120%)}}
 .grad-anim{background:linear-gradient(90deg,#1ed4ff,#186eff,#8a3dff,#c43cff,#8a3dff,#186eff,#1ed4ff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradMove 7s linear infinite}
 @keyframes gradMove{to{background-position:300% 0}}
 @keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-.hero .lead{margin-top:18px;color:var(--mute);font-size:clamp(15px,4vw,19px);font-weight:500;animation:up .9s cubic-bezier(.2,.7,.1,1) 1.15s both;max-width:34em}
-.hero-cta{animation:up .9s cubic-bezier(.2,.7,.1,1) 1.3s both}
+@keyframes upq{from{opacity:.35;transform:translateY(8px)}to{opacity:1;transform:none}}
+.hero .lead{margin-top:18px;color:var(--mute);font-size:clamp(15px,4vw,19px);font-weight:500;animation:upq .4s cubic-bezier(.2,.7,.1,1) .08s both;max-width:34em}
+.hero-cta{animation:upq .4s cubic-bezier(.2,.7,.1,1) .15s both}
 .cta{margin-top:30px;display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
 .cta .btn{width:100%;max-width:320px}
-.scroll{position:absolute;left:50%;bottom:26px;margin-left:-11px;width:22px;height:36px;border-radius:12px;border:1.5px solid rgba(255,255,255,.35);animation:up .9s ease 1.8s both}
+.scroll{position:absolute;left:50%;bottom:26px;margin-left:-11px;width:22px;height:36px;border-radius:12px;border:1.5px solid rgba(255,255,255,.35);animation:up .4s ease .5s both}
 .scroll::after{content:"";position:absolute;left:50%;top:7px;width:3px;height:7px;margin-left:-1.5px;border-radius:2px;background:#fff;animation:sc 1.8s ease-in-out infinite}
 @keyframes sc{0%{opacity:0;transform:translateY(0)}40%{opacity:1}100%{opacity:0;transform:translateY(10px)}}
 
@@ -135,9 +136,9 @@ footer p{margin-top:22px;font-size:13px;color:var(--mute);font-weight:500;letter
 .pkg.feat{isolation:isolate}
 @keyframes spin{to{--ang:360deg}}
 /* reveal motion (only when JS runs) */
-.js .rv{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.1,1),transform .8s cubic-bezier(.2,.7,.1,1)}
+.js .rv{opacity:0;transform:translateY(12px);transition:opacity .4s cubic-bezier(.2,.7,.1,1),transform .4s cubic-bezier(.2,.7,.1,1)}
 .js .rv.in{opacity:1;transform:none}
-.js [data-stagger]>*{transition-delay:calc(var(--i,0) * 90ms)}
+.js [data-stagger]>*{transition-delay:calc(var(--i,0) * 40ms)}
 .js .pkgs[data-stagger]>.pkg{transition-delay:0s}
 .drift{animation:drift 14s ease-in-out infinite alternate}
 @keyframes drift{from{transform:translateX(-3%)}to{transform:translateX(3%)}}
@@ -181,7 +182,7 @@ footer p{margin-top:22px;font-size:13px;color:var(--mute);font-weight:500;letter
  html{scroll-padding-top:80px}
  .hero{padding:110px 0 100px}
  .logo-wrap{max-width:720px}
- .js [data-stagger]>.pkg{transition-delay:calc(var(--i,0) * 120ms)}
+ .js [data-stagger]>.pkg{transition-delay:calc(var(--i,0) * 50ms)}
 }
 @media (max-width:359px){.brand img{width:108px}.nav-cta{padding:0 12px;font-size:12px}}
 
@@ -247,8 +248,8 @@ footer p{margin-top:22px;font-size:13px;color:var(--mute);font-weight:500;letter
 
 /* hero headline */
 .headline{margin-top:34px;font-size:clamp(31px,8.3vw,68px);font-weight:800;line-height:1.08;letter-spacing:-.02em;text-wrap:balance;max-width:15em}
-.headline .ln{display:inline;animation:up .9s cubic-bezier(.2,.7,.1,1) both}
-.headline .ln1{animation-delay:.75s}.headline .ln2{animation-delay:.95s;display:inline-block}
+.headline .ln{display:inline;animation:upq .4s cubic-bezier(.2,.7,.1,1) both}
+.headline .ln1{animation-delay:0s}.headline .ln2{animation-delay:.04s;display:inline-block}
 .hero .lead{max-width:31em;line-height:1.55}
 
 /* about */
@@ -490,7 +491,7 @@ footer .copy{margin-top:14px}
  .pulse::after{animation-duration:7s}
  .scroll::after{animation-duration:4.5s}
  .hero .lead,.hero-cta{animation-name:fadeIn}
- .js .rv{transform:none;transition:opacity .8s ease}
+ .js .rv{transform:none;transition:opacity .4s ease}
 }
 
 /* service videos directly after the hero (v4j): swipe row on phones, 4 across from 900px */
@@ -513,3 +514,10 @@ section.svc-sec{padding:28px 0 8px}
 .f-social .bi{width:22px;height:22px;fill:none;stroke:#8fc0ff;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
 .f-social a:hover{background:rgba(24,110,255,.24);box-shadow:inset 0 0 0 1px rgba(150,170,255,.7)}
 .f-social a:hover .bi{stroke:#fff}
+
+/* v4o: fast intro. Reduced motion: no intro / reveal animation, everything visible at once (ambient loops stay slowed as in v4h) */
+@media (prefers-reduced-motion:reduce){
+ .logo-wrap,.shine,.hero .lead,.hero-cta,.scroll,.headline .ln{animation:none!important}
+ .shine{opacity:0}
+ .js .rv{opacity:1!important;transform:none!important;transition:none!important}
+}
