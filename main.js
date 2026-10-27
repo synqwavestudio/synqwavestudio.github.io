@@ -6,7 +6,8 @@ var RM=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches
 var C=window.SYNQWAVE_CONTENT||{};
 var WA="919209339989",EMAIL="synqwave.business@gmail.com";
 function el(tag,cls,txt){var e=d.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
-function waLink(t){return "https://wa.me/"+WA+"?text="+encodeURIComponent(t);}
+var WA_PRE="\uD83C\uDF10 From synqwave.co website \u2014 ";
+function waLink(t){return "https://wa.me/"+WA+"?text="+encodeURIComponent(WA_PRE+t);}
 
 
 /* ---------- media that fails to load is fetched again ----------
@@ -261,7 +262,7 @@ if(form){
     if(bad.length){form.elements[bad[0]].focus();return false;}
     return true;
   }
-  function waURL(){return "https://wa.me/"+WA+"?text="+encodeURIComponent(compose());}
+  function waURL(){return "https://wa.me/"+WA+"?text="+encodeURIComponent(WA_PRE+compose());}
   function mailURL(){
     var subj="Project enquiry"+(val("business")?" from "+val("business"):(val("name")?" from "+val("name"):""));
     return "mailto:"+EMAIL+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(compose().replace(/\n/g,"\r\n"));
